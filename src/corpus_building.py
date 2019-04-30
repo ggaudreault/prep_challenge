@@ -35,6 +35,7 @@ class corpus_builder():
 		self.full_corpus += text
 
 	def normalize_text_file(self, text_path):
+		print(text_path)
 		with io.open(text_path) as tp:
 			text = tp.read()
 		return self.normalize_full_text(text)

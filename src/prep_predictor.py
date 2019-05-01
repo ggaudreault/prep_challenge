@@ -29,8 +29,6 @@ class prep_predictor():
 	lemmatizer = cpb_c.lemma_line
 
 	def __init__(self, text_path=None):
-		#print(self.prep_pattern)
-		#print("\s\({}\)\s".format("|".join(self.prep_list)))
 		if text_path:
 			self.load_text(text_path)
 
@@ -45,18 +43,9 @@ class prep_predictor():
 			self.ngram_order = self.model.order
 
 	def split_text_into_sections(self, text):
-		#try:
-		#full_text_match = self.section_pattern.match(text, re.DOTALL)
-		#full_text_match = self.section_pattern.match(text, re.MULTILINE)
 		full_text_match = self.section_pattern.match(text)
-		#print(full_text_match)
-		#print(full_text_match.group(0))
 		self.header, self.text, self.footer = full_text_match.group(1), full_text_match.group(4), full_text_match.group(6)
 		self.text = "<s> <s>" + self.text + "</s> </s>"
-		#print(full_text_match.group(5))
-		#self.dump_text("head.txt", self.header)
-		#self.dump_text("foot.txt", self.footer)
-		#self.dump_text("text.txt", self.text)
 
 	def replace_preps(self):
 		self.text = self.prep_pattern.sub(self.prep_pattern_sub, self.text)
@@ -74,148 +63,45 @@ class prep_predictor():
 		print("Predicting...")
 		self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 		while text_bak != self.text:
-			print("...")
-			print("\n\n\n\n\n\n\n\n\n")
-			#print("HEYYYY BIG BOY")
-			text_bak = self.text
+			print("...")			text_bak = self.text
 			self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 
 
 	def predict_prep(self, full_match):
-		#print(time.time())
 		group_match = full_match.group()
-		#if group_match.startswith("M"):
-		#	print("---------HHHEEEEYYYY-------")
-		#print(time.time())
 		if self.live:
 			print("---")
 			print(group_match)
 		match = self.normalizer(group_match, underscore=False)
-		#print(time.time())
-		#match = self.stemmer(match)
 		match = self.lemmatizer(match)
-		#print(time.time())
-		#print(match)
-
-
-		"""
-		#print(match)
-		mod_match = self.rm_unnecessary_punct(match)
-		#print(mod_match)
-		#mod_match = self.my_tokenizer(mod_match)
-		# NLTK WORD TOKENIZE DOESN'T LIKE TAGS
-		#mod_match = nltk.word_tokenize(mod_match)
-		#print(mod_match)
-		"""
-
 		prep = match[-1]
 		context = match[-3:-1]
-		#print(context)
-		#print(prep)
-		#print(context)
 		# we wait to replace the preposition if there's another preposition in its context
 		if "__PREP__" in match[:-1]:
-			#print("GROUP")
 			if self.live:
 				print(group_match)
 			return group_match
-		#if "have" in context or "I" in context or "”" in context:
-		#	print(context)
 		predicted = self.predict_from_context(context, self.prep_list)
-		#print(time.time())
-		#print(context)
-		#print(predicted)
-		#if predicted not in self.prep_list:
-		#	print(predicted)
 		match_predicted = group_match.replace("__PREP__", predicted)
 		if self.live:
 			print(match_predicted)
 		return match_predicted
 
-	"""
-	def my_tokenizer(self, line):
-		space_patt = re.compile(" +")
-		space_sub = r" "
-		line = line.replace("\n", " ")
-		line = space_patt.sub(space_sub, line)
-		return line.split(" ")
-
-
-	def rm_unnecessary_punct(self, match):
-		match = self.unnecessary_punct.sub(self.unnecessary_punct_sub, match)
-		return match
-	"""
-
 	def predict_from_context(self, context, contenders):
-		#print("---------")
-		#print(context)
 		prep_scores = {}
 		highest_score = -float("inf")
 		for prep in contenders:
-			#print(prep)
-			#context = ["a", "book"]
-			#score = 0
 			score = self.model.score(prep, context)
-			#score = self.model.logscore(prep, context)
-			#score2 = self.model.score(i, context[1:])
-			#print(score)
-			#print(score2)
-
-			"""
-			try:
-				score = self.model.logscore(i, context)
-			except:
-				print("in")
-				score = 0
-
-			if score == 0:
-				print("in")
-				try:
-					score = self.model.logscore(i, context[1:])
-				except:
-					score = 0
-
-				if score == 0:
-					try:
-						score = self.model.logscore(i)
-					except:
-						score = 0
-			"""
 
 			prep_scores[prep] = score
 			if score > highest_score:
 				highest_score = score
-
-
-			"""
-			print("--------")
-			print(context)
-			print(i)
-			print(self.model.counts[context][i])
-			print(context[-1:])
-			print(self.model.counts[context[-1:]][i])
-			print(self.model.logscore(i, context[-1:]))
-			print(self.model.score(i, context[-1:]))
-			print("-u-")
-			#print(self.model.prob)
-			print(self.model.unmasked_score(i, context[2:]))
-			print(self.model.unmasked_score(i, context[1:]))
-			#print(self.model.unmasked_score(i, context))
-			print(self.model.unmasked_score(i, context[-1:]))
-			#print(self.model.logscore(i, context))
-			#print(self.model.unmasked_score(i, context))
-			"""
-		#print(prep_scores)
-		#exit()
 
 		highest_preps = []
 		for prep in contenders:
 			if prep_scores[prep] == highest_score:
 				highest_preps.append(prep)
 
-		#print(prep_scores)
-		#print(highest_score)
-		#print(highest_preps)
 		if len(highest_preps) > 1:
 			if len(context) > 1:
 				return self.predict_from_context(context[1:], highest_preps)

@@ -36,16 +36,12 @@ def eval_predictions(reference_path, predicted_path, full_comparison_path="compa
 			if [prep[1].lower() for prep in ref_preps] != [prep[1].lower() for prep in pred_preps]:
 				print(line)
 				print(predicted_text[index])
-				#print([prep[1].lower() for prep in ref_preps])
-				#print([prep[1].lower() for prep in pred_preps])
-			#print([prep[1] for prep in ref_preps])
 			ref_preps_full += [prep[1].lower() for prep in ref_preps]
 			pred_preps_full += [prep[1].lower() for prep in pred_preps]
 
 	zipped_comp = zip(ref_preps_full, pred_preps_full)
 	with io.open(full_comparison_path, 'w') as cp:
 		for zipped in zipped_comp:
-			#cp.write("{}\t{}\n".format(zipped[0][1], zipped[1][1]))
 			cp.write("{}\t{}\n".format(zipped[0], zipped[1]))
 
 	with io.open(result_logs, 'w') as rl:
@@ -78,14 +74,6 @@ def eval_predictions(reference_path, predicted_path, full_comparison_path="compa
 
 	with open(result_logs, 'a') as rl:
 		confusion.to_csv("hello", sep="\t")
-
-
-
-
-y_actu = pd.Series([2, 0, 2, 2, 0, 1, 1, 2, 2, 0, 1, 2], name='Actual')
-y_pred = pd.Series([0, 0, 2, 1, 0, 2, 1, 0, 2, 0, 2, 2], name='Predicted')
-df_confusion = pd.crosstab(y_actu, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True)
-
 
 
 

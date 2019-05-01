@@ -50,7 +50,6 @@ class corpus_builder():
 		self.append_text_to_corpus(text)
 
 	def append_text_to_corpus(self, text):
-		#self.full_corpus += ["<s>"] + text + ["</s>"] 
 		self.full_corpus += text
 
 	def _sub_pattern(self, patt_key, patt_sub, line):
@@ -58,7 +57,6 @@ class corpus_builder():
 
 	def normalize_text_file(self, text_path):
 		print("Normalizing corpus {}".format(text_path))
-		#print(text_path)
 		with io.open(text_path) as tp:
 			text = tp.read()
 		return self.normalize_full_text(text)
@@ -71,38 +69,23 @@ class corpus_builder():
 		# splitting this in a bunch of operations for later when we'll only need some but not all of them
 		text = self.remove_header(text)
 		text = self.remove_footer(text)
-		#text = self.stringify(text)
 		text = self.normalize_line(text)
-		#text = self.stem_line(text)
 		text = self.lemma_line(text)
 		return text
 
 
 	def normalize_line(self, line, underscore=True):
-		#nonword_patt = re.compile("([^\w\s\d])")
-		#nonword_patt_sub = r" \1 "
-		#line = line.replace("\n", " ")
-
 		if underscore:
 			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct", "mult_sentences_begin", "mult_sentences_end", "space"]
 		else:
 			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct_alt", "mult_sentences_begin", "mult_sentences_end", "space"]
 
 		for op in ops:
-			#print(op)
 			line = self._sub_pattern(op, op + "_sub", line)
-
-		#line = self._sub_pattern(self.patterns["newline_pattern"], self.patterns["newline_pattern_sub"], line)
-		#line = self._sub_pattern(self.patterns["sentence_markers_begin"], self.patterns["sentence_markers_begin_sub"], line)
-		#line = self._sub_pattern(self.patterns["sentence_markers_end"], self.patterns["sentence_markers_end_sub"], line)
-		#line = self._sub_pattern(self.patterns["sentence_markers_double"], self.patterns["sentence_markers_double_sub"], line)
-		#line = self._sub_pattern(self.patterns["unnecessary_punct"], self.patterns["unnecessary_punct_sub"], line)
-		#line = self._sub_pattern(self.patterns["space"], self.patterns["space_sub"], line)
 
 		return line.split(" ")
 
 	def stem_line(self, text):
-		#text = [self.ps(t) for t in text]
 		text = [self.stemmer.stem(t) for t in text]
 		return text
 
@@ -111,9 +94,7 @@ class corpus_builder():
 		return text
 
 	def remove_header(self, text):
-		#print(text[:200])
 		text = self.patterns["header_pattern"].sub(self.patterns["header_sub"], text, re.DOTALL)
-		#print(text[:200])
 		return text
 
 	def stringify(self, text):
@@ -128,9 +109,7 @@ class corpus_builder():
 
 
 	def remove_footer(self, text):
-		#print(text[-200:])
 		text = self.patterns["footer_pattern"].sub(self.patterns["footer_sub"], text, re.DOTALL)
-		#print(text[-200:])
 		return text
 
 	def re_init_corpus(self, corpus_path):

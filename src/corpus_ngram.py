@@ -28,27 +28,9 @@ class corpus_ngram():
 			}[model_nm]
 		train, vocab = padded_everygram_pipeline(self.ngram_order, self.text)
 		vocab = Vocabulary(vocab, unk_cutoff=2, unk_label="<UNK>")
-		#for i in train:
-		#	for j in i:
-		#		print(j)
-		#print(train)
 		print("Creating ngram...")
 		self.model.fit(train, vocab)
 		print("done")
-		"""
-		print(self.model.counts["<TBD>"])
-		print(self.model.score("at"))
-		print(self.model.score("<TBD>"))
-		print(self.model.counts[["<TICKER>"]]["<TBD>"])
-		print(self.model.counts[["<TICKER>", "<TICKER>"]]["<TBD>"])
-		print(self.model.score("<TBD>", ["<TICKER>"]))
-		print(self.model.score("<TBD>", ["<TICKER>", "<TICKER>"]))
-		print(self.model.context_counts(("<TICKER>", "<TICKER>")))
-		print(self.model.context_counts(("<TICKER>")))
-		print(self.model.counts.N())
-		print(self.model.counts[2].keys())
-		print(self.model.counts[["<TICKER>"]].items())
-		"""
 
 	def write_model(self, model_path="model.pickle"):
 		try:

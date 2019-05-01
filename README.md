@@ -35,3 +35,21 @@ src:
 - prep_predictor: used to replace all prepositions by __PREP__ and to then predict the value it should take using the n-gram model
 - evaluate_predictions: compares the original text to the predicted one, and outputs a simple log file containing metrics and accuracy data
 run.py: this script calls the above scripts and contains task-specific parameters. Pass of the four parameters as "action": build_corpus, train_model, predict, all
+
+
+
+To-do
+
+1) Figure out why the accuracy is so low. 50% overall accuracy is not the worst, but is not great either. I expected this kind of approach to give me a higher accuracy. More common prepositions like "of" and "to" scored well, but that is probably caused by their overall popularity. Maybe I overlooked something or mis-coded a part of the scripts
+
+2) Improve the prediction process. This approach of looking at tri-grams, then bi-grams, then uni-grams is not accurate enough. A quick way to improve this might be to also have a look at the following word, e.g. 
+- maximize preplexity(context[-2] + __PREP__ + forward_context[:2])
+or simply implement a logistic regressor on the tri/bi/uni-grams and forward bi/tri-grams
+
+3) Document. The code I wrote isn't long -- around 450-500 lines -- and so isn't too hard to read, but it would be a good thing to sit down and document it more.
+
+4) Catch failing cases and cases for exceptions, make the code more robust
+
+
+
+

@@ -63,7 +63,8 @@ class prep_predictor():
 		print("Predicting...")
 		self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 		while text_bak != self.text:
-			print("...")			text_bak = self.text
+			print("...")			
+			text_bak = self.text
 			self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 
 

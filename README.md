@@ -24,3 +24,6 @@ I have divided the task into three operations:
 - The context w_0 w_1 is then passed to a function that generates using the n-gram model the score w_0 w_1 PREP for each of the ten most common prepositions
 - The preposition with the best score is returned as winner
 - If the top score is shared by more than one preposition, the process is repeated on the context[1:] 
+
+
+ADD FILES AND EVAL FN

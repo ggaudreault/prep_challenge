@@ -27,15 +27,15 @@ def train_model():
 	corpus_ngram.write_model(ngram_model)
 
 def predict_prepositions():
-	"""
+	
 	prep_predictor = pcl.prep_predictor(test_data)
-	#prep_predictor.replace_preps()
-	#prep_predictor.dump_text(prep_output_path)
-	prep_predictor.load_text(predicted_text_path)
+	prep_predictor.replace_preps()
+	prep_predictor.dump_text(prep_output_path)
+	#prep_predictor.load_text(predicted_text_path)
 	prep_predictor.load_model(ngram_model)
 	prep_predictor.predict_text()
 	prep_predictor.dump_text(predicted_text_path)
-	"""
+	
 	eval_predictions(test_data, predicted_text_path, comparison_log, result_logs)
 
 
@@ -46,8 +46,8 @@ training_corpus = "output/training_corpus.txt"
 #model_nm = "lidstone"
 #model_nm = "kneserney"
 model_nm = "wittenbell"
-#lemma_stem = "lemma"
-lemma_stem = "stem"
+lemma_stem = "lemma"
+#lemma_stem = "stem"
 ngram_model = "output/ngram_{}.pickle".format(model_nm)
 test_data = "data/test/the_hound_of_the_baskervilles.txt"
 prep_output_path = "output/prep_text.txt"

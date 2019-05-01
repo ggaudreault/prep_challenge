@@ -69,6 +69,7 @@ class prep_predictor():
 
 	def predict_text(self):
 		text_bak = self.text
+		print("Predicting...")
 		self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 		while text_bak != self.text:
 			#print("HEYYYY BIG BOY")
@@ -77,11 +78,10 @@ class prep_predictor():
 
 
 	def predict_prep(self, full_match):
-		print("START")
 		#print(time.time())
 		group_match = full_match.group()
 		#print(time.time())
-		print(group_match)
+		#print(group_match)
 		match = self.normalizer(group_match, underscore=False)
 		#print(time.time())
 		#match = self.stemmer(match)
@@ -112,7 +112,7 @@ class prep_predictor():
 		predicted = self.predict_from_context(context, self.prep_list)
 		#print(time.time())
 		#print(context)
-		print(predicted)
+		#print(predicted)
 		#if predicted not in self.prep_list:
 		#	print(predicted)
 		return group_match.replace("__PREP__", predicted)

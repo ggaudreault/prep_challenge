@@ -28,14 +28,13 @@ I have divided the task into three steps:
 
 Repo
 
-data: divided into "train" -- where the training corpora is kept -- and "test" -- where The Hounds of the Baskervilles is placed
-src:
-- corpus_building: class to use to normalize the text and also generate a training corpus
-- corpus_ngram: class to use to generate an n-gram model from some corpus
-- prep_predictor: used to replace all prepositions by __PREP__ and to then predict the value it should take using the n-gram model
-- evaluate_predictions: compares the original text to the predicted one, and outputs a simple log file containing metrics and accuracy data
-run.py: this script calls the above scripts and contains task-specific parameters. Pass of the four parameters as "action": build_corpus, train_model, predict, all
-
+- data: divided into "train" -- where the training corpora is kept -- and "test" -- where The Hounds of the Baskervilles is placed
+- src:
+- - corpus_building: class to use to normalize the text and also generate a training corpus
+- - corpus_ngram: class to use to generate an n-gram model from some corpus
+- - prep_predictor: used to replace all prepositions by __PREP__ and to then predict the value it should take using the n-gram model
+- - evaluate_predictions: compares the original text to the predicted one, and outputs a simple log file containing metrics and accuracy data
+- run.py: this script calls the above scripts and contains task-specific parameters. Pass of the four parameters as "action": build_corpus, train_model, predict, all
 
 
 To-do
@@ -46,7 +45,7 @@ To-do
 - maximize preplexity(context[-2] + __PREP__ + forward_context[:2])
 or simply implement a logistic regressor on the tri/bi/uni-grams and forward bi/tri-grams
 
-3) Using NLTK, it took me about 80 minutes to predict 5975 prepositions, which is very long. I'd like to look into how to use other libraries to implement something similar, e.g. SpaCy, scikit-learn, kenlm. NLTK seemed to me to be the most straight-forward library, as the first two do not, as far as I know, have any comprehensive n-gram libraries -- no n-gram scoring, smoothing, or backoff -- and I haven't used the last one yet
+3) Using NLTK, it took me about 80 minutes to predict 5975 prepositions, which is very long. I'd like to look into how to use other libraries to implement something similar, e.g. SpaCy, scikit-learn, kenlm. NLTK seemed to me to be the most straight-forward library, as the first two do not, as far as I know, have any comprehensive n-gram libraries -- no n-gram scoring, smoothing, or backoff -- and I haven't used kenlm yet
 
 4) Document. The code I wrote isn't long -- around 450-500 lines -- and so isn't too hard to read, but it would be a good thing to sit down and document it more.
 

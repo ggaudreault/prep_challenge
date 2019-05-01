@@ -31,24 +31,25 @@ def predict_prepositions():
 	prep_predictor = pcl.prep_predictor(test_data)
 	prep_predictor.replace_preps()
 	prep_predictor.dump_text(prep_output_path)
+
 	#prep_predictor.load_text(predicted_text_path)
 	prep_predictor.load_model(ngram_model)
-	prep_predictor.predict_text()
+	prep_predictor.predict_text(live=True)
 	prep_predictor.dump_text(predicted_text_path)
 	
 	eval_predictions(test_data, predicted_text_path, comparison_log, result_logs)
 
 
 
-train_dir = "data/train"
-training_corpus = "output/training_corpus.txt"
-# LIDSTONE BAD
 #model_nm = "lidstone"
 #model_nm = "kneserney"
 model_nm = "wittenbell"
 lemma_stem = "lemma"
 #lemma_stem = "stem"
-ngram_model = "output/ngram_{}.pickle".format(model_nm)
+train_dir = "data/train"
+training_corpus = "output/training_corpus_{}.txt".format(lemma_stem)
+# LIDSTONE BAD
+ngram_model = "output/ngram_{}_{}.pickle".format(model_nm, lemma_stem)
 test_data = "data/test/the_hound_of_the_baskervilles.txt"
 prep_output_path = "output/prep_text.txt"
 predicted_text_path = "output/predicted_text_{}_{}.txt".format(model_nm, lemma_stem)

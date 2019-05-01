@@ -12,6 +12,7 @@ class prep_predictor():
 	header = ""
 	text = ""
 	footer = ""
+	live = False
 	prep_list = ["of", "in", "to", "for", "with", "on", "at", "from", "by", "about"]
 	header_pattern = re.compile("(^[^\*]*\n\*[^\n]*\*\n)\n*(Produced[^\n]*\n)?")
 	footer_pattern = re.compile("End of( the)* Project Gutenberg(.|\n)*$")
@@ -67,11 +68,14 @@ class prep_predictor():
 			op.write(self.text.strip("</s>"))
 			op.write(self.footer)
 
-	def predict_text(self):
+	def predict_text(self, live=False):
+		self.live = live
 		text_bak = self.text
 		print("Predicting...")
 		self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
 		while text_bak != self.text:
+			print("...")
+			print("\n\n\n\n\n\n\n\n\n")
 			#print("HEYYYY BIG BOY")
 			text_bak = self.text
 			self.text = self.prep_pattern_prediction.sub(self.prep_pattern_prediction_sub, self.text)
@@ -80,8 +84,12 @@ class prep_predictor():
 	def predict_prep(self, full_match):
 		#print(time.time())
 		group_match = full_match.group()
+		#if group_match.startswith("M"):
+		#	print("---------HHHEEEEYYYY-------")
 		#print(time.time())
-		#print(group_match)
+		if self.live:
+			print("---")
+			print(group_match)
 		match = self.normalizer(group_match, underscore=False)
 		#print(time.time())
 		#match = self.stemmer(match)
@@ -102,10 +110,14 @@ class prep_predictor():
 
 		prep = match[-1]
 		context = match[-3:-1]
+		#print(context)
 		#print(prep)
 		#print(context)
 		# we wait to replace the preposition if there's another preposition in its context
-		if "__PREP__" in context:
+		if "__PREP__" in match[:-1]:
+			#print("GROUP")
+			if self.live:
+				print(group_match)
 			return group_match
 		#if "have" in context or "I" in context or "”" in context:
 		#	print(context)
@@ -115,7 +127,10 @@ class prep_predictor():
 		#print(predicted)
 		#if predicted not in self.prep_list:
 		#	print(predicted)
-		return group_match.replace("__PREP__", predicted)
+		match_predicted = group_match.replace("__PREP__", predicted)
+		if self.live:
+			print(match_predicted)
+		return match_predicted
 
 	"""
 	def my_tokenizer(self, line):

@@ -33,6 +33,11 @@ def eval_predictions(reference_path, predicted_path, full_comparison_path="compa
 				print(ref_preps)
 				print(pred_preps)
 				exit()
+			if [prep[1].lower() for prep in ref_preps] != [prep[1].lower() for prep in pred_preps]:
+				print(line)
+				print(predicted_text[index])
+				#print([prep[1].lower() for prep in ref_preps])
+				#print([prep[1].lower() for prep in pred_preps])
 			#print([prep[1] for prep in ref_preps])
 			ref_preps_full += [prep[1].lower() for prep in ref_preps]
 			pred_preps_full += [prep[1].lower() for prep in pred_preps]

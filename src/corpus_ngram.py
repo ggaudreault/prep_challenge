@@ -32,7 +32,7 @@ class corpus_ngram():
 		#	for j in i:
 		#		print(j)
 		#print(train)
-		print("creating ngram")
+		print("Creating ngram...")
 		self.model.fit(train, vocab)
 		print("done")
 		"""

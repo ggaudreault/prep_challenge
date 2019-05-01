@@ -28,10 +28,10 @@ I have divided the task into three steps:
 
 Repo
 
-data: divided into "train" -- where the training corpora is kept -- and "test" -- where The Hounds of the Baskervilles is placed
-src:
-- corpus_building: class to use to normalize the text and also generate a training corpus
-- corpus_ngram: class to use to generate an n-gram model from some corpus
-- prep_predictor: used to replace all prepositions by __PREP__ and to then predict the value it should take using the n-gram model
-- evaluate_predictions: compares the original text to the predicted one, and outputs a simple log file containing metrics and accuracy data
-run.py: this script calls the above scripts and contains task-specific parameters. Pass of the four parameters as "action": build_corpus, train_model, predict, all
+- data: divided into "train" -- where the training corpora is kept -- and "test" -- where The Hounds of the Baskervilles is placed
+- src:
+- - corpus_building: class to use to normalize the text and also generate a training corpus
+- - corpus_ngram: class to use to generate an n-gram model from some corpus
+- - prep_predictor: used to replace all prepositions by __PREP__ and to then predict the value it should take using the n-gram model
+- - evaluate_predictions: compares the original text to the predicted one, and outputs a simple log file containing metrics and accuracy data
+- run.py: this script calls the above scripts and contains task-specific parameters. Pass of the four parameters as "action": build_corpus, train_model, predict, all

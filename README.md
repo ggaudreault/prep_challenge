@@ -46,10 +46,10 @@ To-do
 - maximize preplexity(context[-2] + __PREP__ + forward_context[:2])
 or simply implement a logistic regressor on the tri/bi/uni-grams and forward bi/tri-grams
 
-3) Document. The code I wrote isn't long -- around 450-500 lines -- and so isn't too hard to read, but it would be a good thing to sit down and document it more.
+3) Using NLTK, it took me about 80 minutes to predict 5975 prepositions, which is very long. I'd like to look into how to use other libraries to implement something similar, e.g. SpaCy, scikit-learn, kenlm. NLTK seemed to me to be the most straight-forward library, as the first two do not, as far as I know, have any comprehensive n-gram libraries -- no n-gram scoring, smoothing, or backoff -- and I haven't used the last one yet
 
-4) Catch failing cases and cases for exceptions, make the code more robust
+4) Document. The code I wrote isn't long -- around 450-500 lines -- and so isn't too hard to read, but it would be a good thing to sit down and document it more.
 
-
+5) Catch failing cases and cases for exceptions, make the code more robust
 
 

@@ -3,7 +3,7 @@ import os
 import io
 import pickle
 from nltk.lm.preprocessing import padded_everygram_pipeline
-from nltk.lm import MLE, Lidstone
+from nltk.lm import MLE, Lidstone, WittenBellInterpolated, KneserNeyInterpolated, Vocabulary
 
 
 class corpus_ngram():
@@ -21,9 +21,13 @@ class corpus_ngram():
 			text_full = fp.read().split("\n")
 			self.text = [sent.strip().split(" ") for sent in text_full]
 
-	def create_model(self):
-		self.model = Lidstone(0.5, self.ngram_order)
+	def create_model(self, model_nm):
+		self.model = {"lidstone": Lidstone(0.5, self.ngram_order),
+			"kneserney": KneserNeyInterpolated(self.ngram_order),
+			"wittenbell": WittenBellInterpolated(self.ngram_order)
+			}[model_nm]
 		train, vocab = padded_everygram_pipeline(self.ngram_order, self.text)
+		vocab = Vocabulary(vocab, unk_cutoff=2, unk_label="<UNK>")
 		#for i in train:
 		#	for j in i:
 		#		print(j)

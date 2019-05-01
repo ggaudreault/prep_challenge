@@ -4,18 +4,37 @@ import os
 import io
 import nltk
 from nltk.stem.porter import *
+from nltk.stem import WordNetLemmatizer
 
 class corpus_builder():
 	output_path = ""
-	header_pattern = re.compile("(^[^\*]*\n\*[^\n]*\*\n)\n*(Produced[^\n]*\n)?")
-	header_sub = r""
-	footer_pattern = re.compile("End of( the)* Project Gutenberg(.|\n)*$")
-	footer_sub = r""
-	newline_pattern = re.compile("\n")
-	newline_pattern_sub = r" "
-	unnecessary_newline_pattern = re.compile("\n\n+")
-	unnecessary_newline_pattern_sub = r"\n"
+	patterns = {"header_pattern" : re.compile("(^[^\*]*\n\*[^\n]*\*\n)\n*(Produced[^\n]*\n)?"),
+		"header_sub" : r"",
+		"footer_pattern" : re.compile("End of( the)* Project Gutenberg(.|\n)*$"),
+		"footer_sub" : r"",
+		"newline_pattern" : re.compile("\n"),
+		"newline_pattern_sub" : r" ",
+		"unnecessary_newline_pattern" : re.compile("\n\n+"),
+		"unnecessary_newline_pattern_sub" : r"\n",
+		"unnecessary_punct" : re.compile("['\-\_,]"),
+		"unnecessary_punct_sub" : r" ",
+		"unnecessary_punct_alt" : re.compile("['\-,]"),
+		"unnecessary_punct_alt_sub" : r" ",
+		"sentence_markers_begin" : re.compile("[\(\[“]"),
+		"sentence_markers_begin_sub" : r" <s> ",
+		"sentence_markers_end" : re.compile("[\.\?\!\(\)\[\]”]"),
+		"sentence_markers_end_sub" : r" </s> ",
+		"sentence_markers_double" : re.compile("(\-\-|:|;)"),
+		"sentence_markers_double_sub" : r"</s> <s>",
+		"mult_sentences_begin": re.compile("<s>( <s>)+"),
+		"mult_sentences_begin_sub": r"<s>",
+		"mult_sentences_end": re.compile("</s>( </s>)+"),
+		"mult_sentences_end_sub": r"</s>",
+		"space" : re.compile("\s+"),
+		"space_sub" : r" "
+	}
 	stemmer = PorterStemmer()
+	lemmatizer = WordNetLemmatizer()
 
 
 	def __init__(self):
@@ -34,8 +53,12 @@ class corpus_builder():
 		#self.full_corpus += ["<s>"] + text + ["</s>"] 
 		self.full_corpus += text
 
+	def _sub_pattern(self, patt_key, patt_sub, line):
+		return self.patterns[patt_key].sub(self.patterns[patt_sub], line)
+
 	def normalize_text_file(self, text_path):
-		print(text_path)
+		print("Normalizing corpus {}".format(text_path))
+		#print(text_path)
 		with io.open(text_path) as tp:
 			text = tp.read()
 		return self.normalize_full_text(text)
@@ -48,23 +71,48 @@ class corpus_builder():
 		# splitting this in a bunch of operations for later when we'll only need some but not all of them
 		text = self.remove_header(text)
 		text = self.remove_footer(text)
-		text = self.stringify(text)
+		#text = self.stringify(text)
 		text = self.normalize_line(text)
-		text = self.stem_line(text)
+		#text = self.stem_line(text)
+		text = self.lemma_line(text)
 		return text
 
-	def normalize_line(self, text):
-		text = nltk.word_tokenize(text)
-		return text
+
+	def normalize_line(self, line, underscore=True):
+		#nonword_patt = re.compile("([^\w\s\d])")
+		#nonword_patt_sub = r" \1 "
+		#line = line.replace("\n", " ")
+
+		if underscore:
+			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct", "mult_sentences_begin", "mult_sentences_end", "space"]
+		else:
+			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct_alt", "mult_sentences_begin", "mult_sentences_end", "space"]
+
+		for op in ops:
+			#print(op)
+			line = self._sub_pattern(op, op + "_sub", line)
+
+		#line = self._sub_pattern(self.patterns["newline_pattern"], self.patterns["newline_pattern_sub"], line)
+		#line = self._sub_pattern(self.patterns["sentence_markers_begin"], self.patterns["sentence_markers_begin_sub"], line)
+		#line = self._sub_pattern(self.patterns["sentence_markers_end"], self.patterns["sentence_markers_end_sub"], line)
+		#line = self._sub_pattern(self.patterns["sentence_markers_double"], self.patterns["sentence_markers_double_sub"], line)
+		#line = self._sub_pattern(self.patterns["unnecessary_punct"], self.patterns["unnecessary_punct_sub"], line)
+		#line = self._sub_pattern(self.patterns["space"], self.patterns["space_sub"], line)
+
+		return line.split(" ")
 
 	def stem_line(self, text):
 		#text = [self.ps(t) for t in text]
 		text = [self.stemmer.stem(t) for t in text]
 		return text
 
+	def lemma_line(self, text):
+		text = [self.lemmatizer.lemmatize(t) for t in text]
+		return text
+
 	def remove_header(self, text):
 		#print(text[:200])
-		text = self.header_pattern.sub(self.header_sub, text, re.DOTALL)
+		text = self.patterns["header_pattern"].sub(self.patterns["header_sub"], text, re.DOTALL)
 		#print(text[:200])
 		return text
 
@@ -73,9 +121,15 @@ class corpus_builder():
 		text = self.unnecessary_newline_pattern.sub(self.unnecessary_newline_pattern_sub, text)
 		return text
 
+
+	def rm_unnecessary_punct(self, match):
+		match = self.unnecessary_punct.sub(self.unnecessary_punct_sub, match)
+		return match
+
+
 	def remove_footer(self, text):
 		#print(text[-200:])
-		text = self.footer_pattern.sub(self.footer_sub, text, re.DOTALL)
+		text = self.patterns["footer_pattern"].sub(self.patterns["footer_sub"], text, re.DOTALL)
 		#print(text[-200:])
 		return text
 
@@ -85,7 +139,6 @@ class corpus_builder():
 
 	def dump_text(self, output_path="."):
 		with io.open(output_path, 'w') as op:
-			print
 			op.write(" ".join(self.full_corpus))
 
 

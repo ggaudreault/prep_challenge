@@ -7,8 +7,6 @@ import src.prep_predictor as pcl
 from src.evaluate_predictions import eval_predictions
 
 
-#no need for validation
-
 def parse_input():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-a", "--action", help="What do you want to do?\nOptions:\n1) ticker ngram training (ticker)\n2) full text training (train)\n3) evaluation (eval)\n4) everything (all)", default="all", choices=["build_corpus", "train_model", "predict", "all"])
@@ -48,7 +46,6 @@ lemma_stem = "lemma"
 #lemma_stem = "stem"
 train_dir = "data/train"
 training_corpus = "output/training_corpus_{}.txt".format(lemma_stem)
-# LIDSTONE BAD
 ngram_model = "output/ngram_{}_{}.pickle".format(model_nm, lemma_stem)
 test_data = "data/test/the_hound_of_the_baskervilles.txt"
 prep_output_path = "output/prep_text.txt"

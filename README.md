@@ -16,7 +16,7 @@ I have chosen to go with a simple approach here:
 I have divided the task into three steps:
 1) Corpus building: I have gathered the texts from http://www.gutenberg.org . Each text was normalized and lemmatized to only keep the core representation of each token. The header and footer sections were removed
 
-2) Model training: Using nltk, I have generated a trigram model from the training corpus. The standard Lidstone and interpolated Witten-Bell models did not go well with the prediction decision rule I decided to use, as they tend to output identical scores on unseen contexts, hence making the decision to pick a winner difficult.
+2) Model training: Using nltk, I have generated a trigram model from the training corpus. The standard Lidstone and interpolated Kneser-Ney models did not go well with the prediction decision rule I decided to use, as they tend to output identical scores on unseen trigrams, hence making the decision to pick a winner difficult. Instead I used a Witten-Bell smoothing
 
 3) Preposition predictor: The code I wrote works directly on the text as it is formatted, rather than re-formatting it completely and then parsing it. The final output text with the predictions can then simply be diff'd with the original one for easy comparison. The predictor works as follows:
 - Using regex, it looks for the __PREP__ token and the words preceeding it

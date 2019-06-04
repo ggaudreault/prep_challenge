@@ -23,10 +23,6 @@ Character set encoding: UTF-8
 
 
 
-Produced by David Brannan
-
-
-
 
 
 THE VALLEY OF FEAR

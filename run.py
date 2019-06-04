@@ -16,6 +16,7 @@ def parse_input():
 def build_corpus():
 	corpus_build = cpb.corpus_builder()
 	corpus_build.import_corpus_from_dir(train_dir)
+	corpus_build.keep_most_common_words(top=10000)
 	corpus_build.dump_text(training_corpus)
 
 def train_model():

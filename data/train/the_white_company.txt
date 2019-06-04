@@ -23,11 +23,6 @@ Character set encoding: UTF-8
 
 
 
-Produced by Charles Keller, Carlo Traverso, Tonya Allen
-and Samuel S. Johnson
-
-
-
 
 
 

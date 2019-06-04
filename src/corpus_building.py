@@ -3,6 +3,7 @@ import re
 import os
 import io
 import nltk
+import collections
 from nltk.stem.porter import *
 from nltk.stem import WordNetLemmatizer
 
@@ -16,9 +17,9 @@ class corpus_builder():
 		"newline_pattern_sub" : r" ",
 		"unnecessary_newline_pattern" : re.compile("\n\n+"),
 		"unnecessary_newline_pattern_sub" : r"\n",
-		"unnecessary_punct" : re.compile("['\-\_,]"),
+		"unnecessary_punct" : re.compile("['\-\_,—\"]"),
 		"unnecessary_punct_sub" : r" ",
-		"unnecessary_punct_alt" : re.compile("['\-,]"),
+		"unnecessary_punct_alt" : re.compile("['\-,\"]"),
 		"unnecessary_punct_alt_sub" : r" ",
 		"sentence_markers_begin" : re.compile("[\(\[“]"),
 		"sentence_markers_begin_sub" : r" <s> ",
@@ -26,12 +27,18 @@ class corpus_builder():
 		"sentence_markers_end_sub" : r" </s> ",
 		"sentence_markers_double" : re.compile("(\-\-|:|;)"),
 		"sentence_markers_double_sub" : r"</s> <s>",
+		"space_out_tags_right": re.compile(">(\w)"),
+		"space_out_tags_right_sub": r"> \1",
+		"space_out_tags_left": re.compile("(\w)<"),
+		"space_out_tags_left_sub": r"\1 <",
 		"mult_sentences_begin": re.compile("<s>( <s>)+"),
 		"mult_sentences_begin_sub": r"<s>",
 		"mult_sentences_end": re.compile("</s>( </s>)+"),
 		"mult_sentences_end_sub": r"</s>",
 		"space" : re.compile("\s+"),
-		"space_sub" : r" "
+		"space_sub" : r" ",
+		"numbers": re.compile("\d+"),
+		"numbers_sub": r"<numbers>"
 	}
 	stemmer = PorterStemmer()
 	lemmatizer = WordNetLemmatizer()
@@ -76,14 +83,16 @@ class corpus_builder():
 
 	def normalize_line(self, line, underscore=True):
 		if underscore:
-			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct", "mult_sentences_begin", "mult_sentences_end", "space"]
+			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct","space_out_tags_right", "space_out_tags_left", "mult_sentences_begin", "mult_sentences_end", "space", "numbers"]
 		else:
-			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct_alt", "mult_sentences_begin", "mult_sentences_end", "space"]
+			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct_alt","space_out_tags_right", "space_out_tags_left", "mult_sentences_begin", "mult_sentences_end", "space", "numbers"]
 
 		for op in ops:
 			line = self._sub_pattern(op, op + "_sub", line)
 
-		return line.split(" ")
+		line = line.lower()
+
+		return "<s> <s>" + line.split(" ") + "</s> </s>"
 
 	def stem_line(self, text):
 		text = [self.stemmer.stem(t) for t in text]
@@ -101,6 +110,25 @@ class corpus_builder():
 		text = self.newline_pattern.sub(self.newline_pattern_sub, text)
 		text = self.unnecessary_newline_pattern.sub(self.unnecessary_newline_pattern_sub, text)
 		return text
+
+	def keep_most_common_words(self, top):
+		#self.vocab = collections.Counter(set(self.full_corpus))
+		#most_freq_dist = nltk.FreqDist(self.vocab) 
+		most_freq_dist = nltk.FreqDist(self.full_corpus) 
+		vocab = [w[0] for w in most_freq_dist.most_common(top)]
+		for index,word in enumerate(self.full_corpus):
+			if word not in vocab:
+				self.full_corpus[index] = "<UNK>"
+
+
+		"""
+		vec = CountVectorizer().fit(corpus)
+    	bag_of_words = vec.transform(corpus)
+    	sum_words = bag_of_words.sum(axis=0) 
+    	words_freq = [(word, sum_words[0, idx]) for word, idx in     vec.vocabulary_.items()]
+    	words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+    	return words_freq[:n]
+    	"""
 
 
 	def rm_unnecessary_punct(self, match):

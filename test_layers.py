@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 import io
 from keras.utils import to_categorical
+import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
@@ -61,7 +62,23 @@ test_data = keras.preprocessing.sequence.pad_sequences(test_data,
 len(train_data[0]), len(train_data[1])
 print(train_data[0])
 # input shape is the vocabulary count used for the movie reviews (10,000 words)
+
+
+
+# not yet
+#training_text = [full_text[index-2:index] + full_text[index+1:index+3] for word, index in enumerate(full_text[2:-3])]
+#for i,v in enumerate(full_text[2:-3]):
+#  if v in prep_list:
+#    print(full_text[i-2:i])
+
 """
+
+
+
+
+
+
+
 
 
 def build_word_index(vocab):
@@ -70,20 +87,18 @@ def build_word_index(vocab):
 
 
 prep_list = ["of", "in", "to", "for", "with", "on", "at", "from", "by", "about"]
-training_text = "output/training_corpus_lemma.txt"
+training_text = "output/training_corpus_glove_lemma.txt"
 corpus_out = "output/corpus_out."
 
 with io.open(training_text) as tt:
   full_text = tt.read().split(" ")
   vocab = list(set(full_text))
 
+with io.open("output/vocab.txt", 'w') as vcb:
+  vcb.write("\n".join(vocab))
+
 word_index = build_word_index(vocab)
 
-# not yet
-#training_text = [full_text[index-2:index] + full_text[index+1:index+3] for word, index in enumerate(full_text[2:-3])]
-#for i,v in enumerate(full_text[2:-3]):
-#  if v in prep_list:
-#    print(full_text[i-2:i])
 text_data = [full_text[index:index+3] + full_text[index+4:index+7] for index, word in enumerate(full_text[3:-4]) if word in prep_list]
 text_data = [[word_index[w] for w in quatro] for quatro in text_data]
 
@@ -106,29 +121,12 @@ y_val = to_categorical(np.array(text_labels[5000:15000]))
 
 vocab_size = len(vocab)
 
-"""
-print(len(train_data))
-print(len(train_labels))
-print(len(train_data[0]))
-print(train_labels[:5])
-print(len(test_data))
-print(len(test_labels))
-print(len(x_val))
-print(len(y_val))
-"""
-
 print(train_data.shape)
 print(train_labels.shape)
 print(test_data.shape)
 print(test_labels.shape)
 print(x_val.shape)
 print(y_val.shape)
-
-#for case in train_data:
-#  if len(case) != 4:
-#    print("--------")
-#    print(case)
-
 
 model = keras.Sequential()
 model.add(keras.layers.Embedding(vocab_size, 16))
@@ -156,59 +154,32 @@ history_dict = history.history
 
 history_dict.keys()
 
-import matplotlib.pyplot as plt
 
 
 
 acc = history_dict['acc']
-
 val_acc = history_dict['val_acc']
-
 loss = history_dict['loss']
-
 val_loss = history_dict['val_loss']
-
-
 
 epochs = range(1, len(acc) + 1)
 
-
-
-# "bo" is for "blue dot"
-
 plt.plot(epochs, loss, 'bo', label='Training loss')
-
-# b is for "solid blue line"
-
 plt.plot(epochs, val_loss, 'b', label='Validation loss')
-
 plt.title('Training and validation loss')
-
 plt.xlabel('Epochs')
-
 plt.ylabel('Loss')
-
 plt.legend()
-
-
 
 plt.show()
 plt.clf()   # clear figure
 
-
-
 plt.plot(epochs, acc, 'bo', label='Training acc')
-
 plt.plot(epochs, val_acc, 'b', label='Validation acc')
-
 plt.title('Training and validation accuracy')
-
 plt.xlabel('Epochs')
-
 plt.ylabel('Accuracy')
-
 plt.legend()
-
 
 
 plt.show()

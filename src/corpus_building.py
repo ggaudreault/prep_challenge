@@ -38,16 +38,27 @@ class corpus_builder():
 		"space" : re.compile("\s+"),
 		"space_sub" : r" ",
 		"numbers": re.compile("\d+"),
-		"numbers_sub": r"<numbers>"
+		"numbers_sub": r"<numbers>",
+		"punctuation_space": re.compile("(\W)"),
+		"punctuation_space_sub": r' \1 ',
+		"multiple_spaces": re.compile("  +"),
+		"multiple_spaces_sub": r' ',
+		"possessive": re.compile(" ' s "),
+		"possessive_sub": r" 's ",
+		"numbers_alt": re.compile("\d+"),
+		"numbers_alt_sub": r"0"
 	}
 	stemmer = PorterStemmer()
 	lemmatizer = WordNetLemmatizer()
+	word_emb = False
 
 
 	def __init__(self):
 		self.full_corpus = []
 
-	def import_corpus_from_dir(self, directory):
+	def import_corpus_from_dir(self, directory, word_emb=False):
+		if word_emb:
+			self.word_emb = True
 		corpora = os.listdir(directory)
 		for corpus in corpora:
 			self.add_text(os.path.join(directory, corpus))
@@ -76,12 +87,24 @@ class corpus_builder():
 		# splitting this in a bunch of operations for later when we'll only need some but not all of them
 		text = self.remove_header(text)
 		text = self.remove_footer(text)
-		text = self.normalize_line(text)
-		text = self.lemma_line(text)
+		if self.word_emb:
+			text = self.normalize_line_for_text_emb(text)
+		else:
+			text = self.normalize_line(text)
+			text = self.lemma_line(text)
 		return text
 
 
+	def normalize_line_for_text_emb(self, line):
+		ops = ["newline_pattern", "punctuation_space", "possessive", "numbers_alt", "multiple_spaces"]
+		for op in ops:
+			line = self._sub_pattern(op, op + "_sub", line)
+		line = line.lower()
+
+		return line.split(" ")
+
 	def normalize_line(self, line, underscore=True):
+
 		if underscore:
 			ops = ["newline_pattern", "sentence_markers_begin", "sentence_markers_end", "sentence_markers_double", "unnecessary_punct","space_out_tags_right", "space_out_tags_left", "mult_sentences_begin", "mult_sentences_end", "space", "numbers"]
 		else:
@@ -92,7 +115,7 @@ class corpus_builder():
 
 		line = line.lower()
 
-		return "<s> <s>" + line.split(" ") + "</s> </s>"
+		return ["<s>","<s>"] + line.split(" ") + ["</s>,</s>"]
 
 	def stem_line(self, text):
 		text = [self.stemmer.stem(t) for t in text]

@@ -9,7 +9,7 @@ from src.evaluate_predictions import eval_predictions
 
 def parse_input():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-a", "--action", help="What do you want to do?\nOptions:\n1) ticker ngram training (ticker)\n2) full text training (train)\n3) evaluation (eval)\n4) everything (all)", default="all", choices=["build_corpus", "train_model", "predict", "all"])
+	parser.add_argument("-a", "--action", help="What do you want to do?\nOptions:\n1) ticker ngram training (ticker)\n2) full text training (train)\n3) evaluation (eval)\n4) everything (all)", default="all", choices=["build_corpus", "build_emb", "train_model", "predict", "all"])
 	args = parser.parse_args()
 	return args.action
 
@@ -17,6 +17,13 @@ def build_corpus():
 	corpus_build = cpb.corpus_builder()
 	corpus_build.import_corpus_from_dir(train_dir)
 	corpus_build.keep_most_common_words(top=10000)
+	corpus_build.dump_text(training_corpus)
+
+def build_emb():
+	corpus_build = cpb.corpus_builder()
+	print("Importing corpus for word embedding classifier, watch out")
+	corpus_build.import_corpus_from_dir(train_dir, word_emb=True)
+	#corpus_build.keep_most_common_words(top=10000)
 	corpus_build.dump_text(training_corpus)
 
 def train_model():
@@ -46,7 +53,8 @@ model_nm = "wittenbell"
 lemma_stem = "lemma"
 #lemma_stem = "stem"
 train_dir = "data/train"
-training_corpus = "output/training_corpus_{}.txt".format(lemma_stem)
+training_corpus = "output/training_corpus_glove_{}.txt".format(lemma_stem)
+#training_corpus = "output/training_corpus_{}.txt".format(lemma_stem)
 ngram_model = "output/ngram_{}_{}.pickle".format(model_nm, lemma_stem)
 test_data = "data/test/the_hound_of_the_baskervilles.txt"
 prep_output_path = "output/prep_text.txt"
@@ -59,6 +67,8 @@ action = parse_input()
 
 if action in ["build_corpus", "all"]:
 	build_corpus()
+if action in ["build_emb"]:
+	build_emb()
 if action in ["train_model", "all"]:
 	train_model()
 if action in ["predict", "all"]:

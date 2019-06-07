@@ -51,6 +51,7 @@ class corpus_builder():
 	stemmer = PorterStemmer()
 	lemmatizer = WordNetLemmatizer()
 	word_emb = False
+	filter_vocab = "output/glove_vocab.txt"
 
 
 	def __init__(self):
@@ -100,6 +101,12 @@ class corpus_builder():
 		for op in ops:
 			line = self._sub_pattern(op, op + "_sub", line)
 		line = line.lower()
+
+		with io.open(self.filter_vocab) as fv:
+			vocab = fv.read().split("\n")
+			line_split = line.split(" ")
+			line_split = filter(lambda w: w in vocab, line_split)
+			line = " ".join(line_split)
 
 		return line.split(" ")
 

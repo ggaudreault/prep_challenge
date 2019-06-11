@@ -1,7 +1,8 @@
 import io
 
 #embeddings_index = dict()
-with io.open('glove.6B/glove.6B.50d.txt') as glove, io.open("output/glove_reduced.txt", 'w') as gred, io.open("output/vocab.txt") as vocab_f:
+DIM = 100
+with io.open('glove.6B/glove.6B.{}d.txt'.format(DIM)) as glove, io.open("output/glove_reduced_{}.txt".format(DIM), 'w') as gred, io.open("output/vocab.txt") as vocab_f:
 	vocab = vocab_f.read().split("\n")
 	glove_vocab = []
 	print(len(vocab))

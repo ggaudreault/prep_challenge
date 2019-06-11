@@ -6,79 +6,17 @@ import pickle
 import io
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
+from numpy import array
+from numpy import asarray
+from numpy import zeros
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.regularizers import l1
 
 print(tf.__version__)
 
-"""
-(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
-print("Training entries: {}, labels: {}".format(len(train_data), len(train_labels)))
-print(train_data[0])
-len(train_data[0]), len(train_data[1])
-# A dictionary mapping words to an integer index
 
-word_index = imdb.get_word_index()
-
-
-
-# The first indices are reserved
-
-word_index = {k:(v+3) for k,v in word_index.items()}
-
-word_index["<PAD>"] = 0
-
-word_index["<START>"] = 1
-
-word_index["<UNK>"] = 2  # unknown
-
-word_index["<UNUSED>"] = 3
-
-
-
-reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
-
-
-
-def decode_review(text):
-
-    return ' '.join([reverse_word_index.get(i, '?') for i in text])
-decode_review(train_data[0])
-train_data = keras.preprocessing.sequence.pad_sequences(train_data,
-
-                                                        value=word_index["<PAD>"],
-
-                                                        padding='post',
-
-                                                        maxlen=256)
-
-
-
-test_data = keras.preprocessing.sequence.pad_sequences(test_data,
-
-                                                       value=word_index["<PAD>"],
-
-                                                       padding='post',
-
-                                                       maxlen=256)
-len(train_data[0]), len(train_data[1])
-print(train_data[0])
-# input shape is the vocabulary count used for the movie reviews (10,000 words)
-
-
-
-# not yet
-#training_text = [full_text[index-2:index] + full_text[index+1:index+3] for word, index in enumerate(full_text[2:-3])]
-#for i,v in enumerate(full_text[2:-3]):
-#  if v in prep_list:
-#    print(full_text[i-2:i])
-
-"""
-
-
-
-
-
-
-
+EMB_DIM = 50
+INPUT_LENGTH = 6
 
 
 def build_word_index(vocab):
@@ -91,18 +29,47 @@ training_text = "output/training_corpus_glove_lemma.txt"
 corpus_out = "output/corpus_out."
 
 with io.open(training_text) as tt:
-  full_text = tt.read().split(" ")
-  vocab = list(set(full_text))
+  full_text = [".", "."] +  tt.read().split(" ") + [".", "."]
+  #vocab = list(set(full_text))
 
-with io.open("output/vocab.txt", 'w') as vcb:
-  vcb.write("\n".join(vocab))
 
-word_index = build_word_index(vocab)
+#with io.open("output/vocab.txt", 'w') as vcb:
+#  vcb.write("\n".join(vocab))
+
+#word_index = build_word_index(vocab)
 
 text_data = [full_text[index:index+3] + full_text[index+4:index+7] for index, word in enumerate(full_text[3:-4]) if word in prep_list]
-text_data = [[word_index[w] for w in quatro] for quatro in text_data]
+#text_data = [full_text[index+4:index+7] for index, word in enumerate(full_text[:-4]) if word in prep_list]
+
 
 text_labels = [prep_list.index(word) for word in full_text if word in prep_list]
+
+#print(text_data[:10])
+#print(text_labels[:10])
+
+tokens = Tokenizer()
+#tokens.fit_on_texts([full_text])
+tokens.fit_on_texts(text_data)
+vocab_size = len(tokens.word_index) + 1
+text_data = tokens.texts_to_sequences(text_data)
+
+#text_data = [[word_index[w] for w in quatro] for quatro in text_data]
+
+emb_index = {}
+with io.open("output/glove_reduced_{}.txt".format(EMB_DIM)) as glove:
+  for line in glove:
+    word_emb = line.split()
+    word = word_emb[0]
+    weights = asarray(word_emb[1:], dtype='float32')
+    emb_index[word] = weights
+
+
+emb_matrix = zeros((vocab_size, EMB_DIM))
+for word, index in tokens.word_index.items():
+  emb_vector = emb_index.get(word)
+  if emb_vector is not None:
+    emb_matrix[index] = emb_vector
+
 
 print(len(text_labels))
 print(len(text_data))
@@ -119,7 +86,7 @@ train_labels = to_categorical(np.array(text_labels[15000:]))
 x_val = np.array(text_data[5000:15000])
 y_val = to_categorical(np.array(text_labels[5000:15000]))
 
-vocab_size = len(vocab)
+#vocab_size = len(vocab)
 
 print(train_data.shape)
 print(train_labels.shape)
@@ -129,10 +96,12 @@ print(x_val.shape)
 print(y_val.shape)
 
 model = keras.Sequential()
-model.add(keras.layers.Embedding(vocab_size, 16))
-model.add(keras.layers.GlobalAveragePooling1D())
-model.add(keras.layers.Dense(16, activation=tf.nn.relu))
-model.add(keras.layers.Dense(10, activation=tf.nn.softmax))
+model.add(keras.layers.Embedding(vocab_size, EMB_DIM, weights=[emb_matrix], input_length=INPUT_LENGTH, trainable=True)),
+#model.add(keras.layers.GlobalAveragePooling1D())
+#model.add(keras.layers.Concatenate(axis=-1))
+model.add(keras.layers.Reshape((INPUT_LENGTH * EMB_DIM,)))
+model.add(keras.layers.Dense(50, activation=tf.nn.relu))
+model.add(keras.layers.Dense(10, activation=tf.nn.softmax, activity_regularizer=l1(0.1)))
 model.summary()
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
 
@@ -142,7 +111,8 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc']
 #y_val = train_labels[:10000]
 #partial_y_train = train_labels[10000:]
 
-history = model.fit(train_data, train_labels, epochs=40, batch_size=512, validation_data=(x_val, y_val), verbose=1)
+#history = model.fit(train_data, train_labels, epochs=200, batch_size=512, validation_data=(x_val, y_val), verbose=1)
+history = model.fit(train_data, train_labels, epochs=15, batch_size=512, validation_data=(x_val, y_val), verbose=1)
 #history = model.fit(train_data, train_labels, epochs=40, batch_size=512, verbose=1)
 
 results = model.evaluate(test_data, test_labels)

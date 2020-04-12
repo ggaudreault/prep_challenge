@@ -101,6 +101,7 @@ model.add(keras.layers.Embedding(vocab_size, EMB_DIM, weights=[emb_matrix], inpu
 #model.add(keras.layers.Concatenate(axis=-1))
 model.add(keras.layers.Reshape((INPUT_LENGTH * EMB_DIM,)))
 model.add(keras.layers.Dense(50, activation=tf.nn.relu))
+#model.add(keras.layers.Dropout(0.2))
 model.add(keras.layers.Dense(10, activation=tf.nn.softmax, activity_regularizer=l1(0.1)))
 model.summary()
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
@@ -112,7 +113,7 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc']
 #partial_y_train = train_labels[10000:]
 
 #history = model.fit(train_data, train_labels, epochs=200, batch_size=512, validation_data=(x_val, y_val), verbose=1)
-history = model.fit(train_data, train_labels, epochs=15, batch_size=512, validation_data=(x_val, y_val), verbose=1)
+history = model.fit(train_data, train_labels, epochs=10, batch_size=512, validation_data=(x_val, y_val), verbose=1)
 #history = model.fit(train_data, train_labels, epochs=40, batch_size=512, verbose=1)
 
 results = model.evaluate(test_data, test_labels)
